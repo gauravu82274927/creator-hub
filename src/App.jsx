@@ -1,5 +1,4 @@
-import React from "react";
-
+import React, { useEffect, useState } from "react";
 import {
   ArrowUpRight,
   ChevronDown,
@@ -7,9 +6,10 @@ import {
   Instagram,
   Play,
   Radio,
-  Twitch,
-  Youtube
+  Youtube,
 } from "lucide-react";
+
+import { getCreatorData } from "./services/youtube";
 
 const creator = {
   name: "INFERNO",
@@ -21,71 +21,82 @@ const creator = {
 
   instagram: "https://www.instagram.com/_inferno_172/",
   youtube: "https://www.youtube.com/@_Inferno_playz",
-
-  subscribers: "18.3K",
-  videos: "667",
-  views: "1.35M"
 };
 
-const streams = [
-  {
-    title: "THE LOBBY IS COOKING ME",
-    game: "VALORANT",
-    viewers: "58 watching",
-    duration: "LIVE",
-    type: "live",
-    image:
-      "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=85"
-  },
-  {
-    title: "MY NIGHT MARKET BETTER NOT BE TRASH",
-    game: "VALORANT",
-    viewers: "6.7K views",
-    duration: "5:41:43",
-    type: "vod",
-    image:
-      "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=1200&q=85"
-  },
-  {
-    title: "THIS GAME IS GASLIGHTING ME",
-    game: "VALORANT",
-    viewers: "8.9K views",
-    duration: "5:39:37",
-    type: "vod",
-    image:
-      "https://images.unsplash.com/photo-1605899435973-ca2d1a8861cf?auto=format&fit=crop&w=1200&q=85"
-  }
-];
+function formatNumber(value) {
+  if (!value) return "0";
 
-const videos = [
-  {
-    title: "THE MOST CHAOTIC RANKED GAME",
-    category: "VALORANT",
-    image:
-      "https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=1200&q=85"
-  },
-  {
-    title: "WE SHOULD NOT HAVE WON THIS",
-    category: "VALORANT",
-    image:
-      "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=1200&q=85"
-  },
-  {
-    title: "TRYING A COMPLETELY NEW GAME",
-    category: "AAA / STORY",
-    image:
-      "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=85"
+  const number = Number(value);
+
+  if (number >= 1000000) {
+    return `${(number / 1000000).toFixed(2)}M`;
   }
-];
+
+  if (number >= 1000) {
+    return `${(number / 1000).toFixed(1)}K`;
+  }
+
+  return number.toLocaleString();
+}
+
+function formatDuration(duration) {
+  if (!duration) return "";
+
+  const match = duration.match(
+    /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/
+  );
+
+  if (!match) return "";
+
+  const hours = Number(match[1] || 0);
+  const minutes = Number(match[2] || 0);
+  const seconds = Number(match[3] || 0);
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(
+      seconds
+    ).padStart(2, "0")}`;
+  }
+
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
 
 function App() {
+  const [youtubeData, setYoutubeData] = useState(null);
+  const [youtubeLoading, setYoutubeLoading] = useState(true);
+  const [youtubeError, setYoutubeError] = useState("");
+
+  useEffect(() => {
+    async function loadYouTubeData() {
+      try {
+        setYoutubeLoading(true);
+
+        const data = await getCreatorData();
+
+        console.log("YouTube data received:", data);
+
+        setYoutubeData(data);
+      } catch (error) {
+        console.error("YouTube API Error:", error);
+        setYoutubeError(error.message);
+      } finally {
+        setYoutubeLoading(false);
+      }
+    }
+
+    loadYouTubeData();
+  }, []);
+
+  const videos = youtubeData?.videos || [];
+
+  const latestVideos = videos.slice(0, 3);
+  const additionalVideos = videos.slice(3, 6);
+
   return (
     <div className="site">
-
       {/* NAVBAR */}
       <header className="navbar">
         <div className="nav-inner">
-
           <a href="#top" className="logo">
             <span className="logo-mark"></span>
             <span>INFERNO</span>
@@ -118,28 +129,28 @@ function App() {
               <ArrowUpRight size={16} />
             </a>
           </div>
-
         </div>
       </header>
 
       <main id="top">
-
         {/* HERO */}
         <section className="hero">
-
           <div className="hero-background">
             <div className="hero-grid"></div>
             <div className="hero-glow"></div>
           </div>
 
           <div className="container hero-content">
-
             <div className="hero-copy">
-
               <div className="live-pill">
                 <span className="live-dot"></span>
-                LIVE ON YOUTUBE
-              </div>
+
+                {youtubeLoading
+                    ? "CHECKING YOUTUBE..."
+                    : youtubeData?.liveVideo
+                    ? "LIVE ON YOUTUBE"
+                    : "LATEST ON YOUTUBE"}
+                </div>
 
               <h1>
                 PLAY HARD.
@@ -153,7 +164,6 @@ function App() {
               </p>
 
               <div className="hero-buttons">
-
                 <a
                   href={creator.youtube}
                   target="_blank"
@@ -173,35 +183,30 @@ function App() {
                   <Instagram size={17} />
                   Instagram
                 </a>
-
               </div>
-
             </div>
 
             <div className="hero-profile">
-
               <div className="profile-ring">
-
                 <img
-                    className="profile-image"
-                    src="/images/inferno-profile.jpg"
-                    alt="INFERNO"
+                  className="profile-image"
+                  src="/images/inferno-profile.jpg"
+                  alt="INFERNO"
                 />
 
-                <div className="profile-live">
-                  <Radio size={13} />
-                  LIVE
-                </div>
-
+                {youtubeData?.liveVideo && (
+                    <div className="profile-live">
+                        <Radio size={13} />
+                        LIVE
+                    </div>
+                    )}
               </div>
 
               <div className="profile-name">
                 <strong>{creator.name}</strong>
                 <span>{creator.handle}</span>
               </div>
-
             </div>
-
           </div>
 
           <div className="hero-bottom-fade"></div>
@@ -209,25 +214,41 @@ function App() {
 
         {/* STATS */}
         <section className="stats-section">
-
           <div className="container stats">
-
             <div className="stat">
-              <strong>{creator.subscribers}</strong>
+              <strong>
+                {youtubeLoading
+                  ? "..."
+                  : formatNumber(
+                      youtubeData?.channel?.statistics?.subscriberCount
+                    )}
+              </strong>
               <span>Subscribers</span>
             </div>
 
             <div className="stat-divider"></div>
 
             <div className="stat">
-              <strong>{creator.videos}</strong>
+              <strong>
+                {youtubeLoading
+                  ? "..."
+                  : formatNumber(
+                      youtubeData?.channel?.statistics?.videoCount
+                    )}
+              </strong>
               <span>Videos</span>
             </div>
 
             <div className="stat-divider"></div>
 
             <div className="stat">
-              <strong>{creator.views}</strong>
+              <strong>
+                {youtubeLoading
+                  ? "..."
+                  : formatNumber(
+                      youtubeData?.channel?.statistics?.viewCount
+                    )}
+              </strong>
               <span>Total views</span>
             </div>
 
@@ -237,18 +258,13 @@ function App() {
               <strong>{creator.location}</strong>
               <span>Based in</span>
             </div>
-
           </div>
-
         </section>
 
-        {/* LIVE */}
+        {/* LIVE / VODS */}
         <section id="streams" className="section">
-
           <div className="container">
-
             <div className="section-heading">
-
               <div>
                 <div className="eyebrow">
                   <span className="small-live-dot"></span>
@@ -258,8 +274,8 @@ function App() {
                 <h2>Streams & VODs</h2>
 
                 <p>
-                  Catch the latest rank grinds, chaotic moments and
-                  long-form gaming sessions.
+                  Catch the latest rank grinds, chaotic moments and long-form
+                  gaming sessions.
                 </p>
               </div>
 
@@ -272,75 +288,94 @@ function App() {
                 View all
                 <ArrowUpRight size={16} />
               </a>
-
             </div>
+
+            {youtubeError && (
+              <div className="loading-message">
+                Unable to load YouTube videos.
+              </div>
+            )}
 
             <div className="stream-grid">
+              {youtubeLoading && (
+                <div className="loading-message">
+                  Loading latest videos...
+                </div>
+              )}
 
-              {streams.map((stream, index) => (
-                <article
-                  className={`stream-card ${
-                    stream.type === "live" ? "is-live" : ""
-                  }`}
-                  key={index}
-                >
+              {!youtubeLoading &&
+                !youtubeError &&
+                latestVideos.map((video) => (
+                  <article className="stream-card" key={video.id}>
+                    <a
+                      href={`https://www.youtube.com/watch?v=${video.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <div className="thumbnail">
+                        <img
+                          src={
+                            video.snippet.thumbnails.high?.url ||
+                            video.snippet.thumbnails.medium?.url
+                          }
+                          alt={video.snippet.title}
+                        />
 
-                  <div className="thumbnail">
+                        <div className="thumbnail-overlay"></div>
 
-                    <img
-                      src={stream.image}
-                      alt=""
-                    />
+                        {video.snippet.liveBroadcastContent === "live" ? (
+                          <span className="live-label">
+                            <span></span>
+                            LIVE
+                          </span>
+                        ) : (
+                          <span className="duration">
+                            {formatDuration(
+                              video.contentDetails?.duration
+                            )}
+                          </span>
+                        )}
 
-                    <div className="thumbnail-overlay"></div>
+                        <button
+                          className="play-button"
+                          type="button"
+                          aria-label={`Play ${video.snippet.title}`}
+                        >
+                          <Play size={19} fill="currentColor" />
+                        </button>
+                      </div>
 
-                    {stream.type === "live" ? (
-                      <span className="live-label">
-                        <span></span>
-                        LIVE
-                      </span>
-                    ) : (
-                      <span className="duration">
-                        {stream.duration}
-                      </span>
-                    )}
+                      <div className="card-content">
+                        <div className="card-meta">
+                          <span>
+                            {video.snippet.liveBroadcastContent === "live"
+                              ? "LIVE"
+                              : "YOUTUBE"}
+                          </span>
 
-                    <button className="play-button">
-                      <Play size={19} fill="currentColor" />
-                    </button>
+                          <span>
+                            {video.statistics?.viewCount
+                              ? `${formatNumber(
+                                  video.statistics.viewCount
+                                )} views`
+                              : ""}
+                          </span>
+                        </div>
 
-                  </div>
-
-                  <div className="card-content">
-
-                    <div className="card-meta">
-                      <span>{stream.game}</span>
-                      <span>{stream.viewers}</span>
-                    </div>
-
-                    <h3>{stream.title}</h3>
-
-                  </div>
-
-                </article>
-              ))}
-
+                        <h3>{video.snippet.title}</h3>
+                      </div>
+                    </a>
+                  </article>
+                ))}
             </div>
-
           </div>
-
         </section>
 
         {/* CONTENT SPLIT */}
         <section className="content-section">
-
           <div className="container content-layout">
-
             <div className="content-intro">
-
-              <div className="eyebrow">
-                CONTENT
-              </div>
+              <div className="eyebrow">CONTENT</div>
 
               <h2>
                 More than
@@ -350,8 +385,7 @@ function App() {
 
               <p>
                 From sweaty ranked sessions to cinematic story games,
-                there's always something different happening on the
-                channel.
+                there's always something different happening on the channel.
               </p>
 
               <a
@@ -363,11 +397,9 @@ function App() {
                 Explore channel
                 <ExternalLink size={16} />
               </a>
-
             </div>
 
             <div className="game-types">
-
               <div className="game-type active">
                 <span className="game-number">01</span>
 
@@ -400,28 +432,18 @@ function App() {
 
                 <ArrowUpRight size={20} />
               </div>
-
             </div>
-
           </div>
-
         </section>
 
         {/* VIDEOS */}
         <section id="videos" className="section videos-section">
-
           <div className="container">
-
             <div className="section-heading">
-
               <div>
-
-                <div className="eyebrow">
-                  LATEST UPLOADS
-                </div>
+                <div className="eyebrow">LATEST UPLOADS</div>
 
                 <h2>Watch the chaos.</h2>
-
               </div>
 
               <a
@@ -433,79 +455,74 @@ function App() {
                 YouTube
                 <ArrowUpRight size={16} />
               </a>
-
             </div>
 
             <div className="video-grid">
+              {!youtubeLoading &&
+                !youtubeError &&
+                additionalVideos.map((video) => (
+                  <article className="video-card" key={video.id}>
+                    <a
+                      href={`https://www.youtube.com/watch?v=${video.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <div className="video-image">
+                        <img
+                          src={
+                            video.snippet.thumbnails.high?.url ||
+                            video.snippet.thumbnails.medium?.url
+                          }
+                          alt={video.snippet.title}
+                        />
 
-              {videos.map((video, index) => (
-                <article className="video-card" key={index}>
+                        <div className="video-overlay">
+                          <span className="video-play">
+                            <Play size={18} fill="currentColor" />
+                          </span>
+                        </div>
+                      </div>
 
-                  <div className="video-image">
+                      <div className="video-info">
+                        <span>
+                          {video.snippet.liveBroadcastContent === "live"
+                            ? "LIVE"
+                            : "YOUTUBE"}
+                        </span>
 
-                    <img
-                      src={video.image}
-                      alt=""
-                    />
-
-                    <div className="video-overlay">
-                      <span className="video-play">
-                        <Play size={18} fill="currentColor" />
-                      </span>
-                    </div>
-
-                  </div>
-
-                  <div className="video-info">
-
-                    <span>{video.category}</span>
-
-                    <h3>{video.title}</h3>
-
-                  </div>
-
-                </article>
-              ))}
-
+                        <h3>{video.snippet.title}</h3>
+                      </div>
+                    </a>
+                  </article>
+                ))}
             </div>
-
           </div>
-
         </section>
 
         {/* ABOUT */}
         <section id="about" className="about-section">
-
           <div className="container">
-
             <div className="about-card">
-
               <div className="about-left">
-
-                <div className="eyebrow">
-                  ABOUT INFERNO
-                </div>
+                <div className="eyebrow">ABOUT INFERNO</div>
 
                 <h2>
                   Welcome to
                   <br />
                   the grind.
                 </h2>
-
               </div>
 
               <div className="about-right">
-
                 <p>{creator.description}</p>
 
                 <p>
-                  The channel is built around competitive Valorant,
-                  funny gaming moments, story-driven experiences and
-                  hanging out with the community.
+                  The channel is built around competitive Valorant, funny
+                  gaming moments, story-driven experiences and hanging out
+                  with the community.
                 </p>
 
                 <div className="about-links">
-
                   <a
                     href={creator.youtube}
                     target="_blank"
@@ -525,54 +542,35 @@ function App() {
                     Instagram
                     <ArrowUpRight size={15} />
                   </a>
-
                 </div>
-
               </div>
-
             </div>
-
           </div>
-
         </section>
-
       </main>
 
       {/* FOOTER */}
       <footer>
-
         <div className="container footer-inner">
-
           <div className="footer-brand">
-
             <div className="logo">
               <span className="logo-mark"></span>
               INFERNO
             </div>
 
-            <p>
-              Gaming. Chaos. Community.
-            </p>
-
+            <p>Gaming. Chaos. Community.</p>
           </div>
 
           <div className="footer-right">
-
-            <span>
-              {new Date().getFullYear()} INFERNO
-            </span>
+            <span>{new Date().getFullYear()} INFERNO</span>
 
             <a href="#top">
               Back to top
               <ChevronDown size={15} className="rotate-up" />
             </a>
-
           </div>
-
         </div>
-
       </footer>
-
     </div>
   );
 }
