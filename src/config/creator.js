@@ -3,68 +3,76 @@ const creator = {
   // BASIC CREATOR INFO
   // =========================
 
-  name: "CAPTAIN VAANI",
-  displayName: "Captain Vaani",
-  handle: "@CaptainVaani",
-  location: "India",
+  name: "SHAWTT GAMING",
+  displayName: "Shawtt Gaming",
+  handle: "@Shawtt",
+  location: "Ghaziabad, India",
 
   // =========================
   // SOCIAL LINKS
   // =========================
 
-  youtube: "https://www.youtube.com/@CaptainVaani",
-  instagram: "https://www.instagram.com/thecaptainvaani/",
-  discord: "https://discord.gg/fvacdZ3mq6",
+  youtube:
+    "https://www.youtube.com/channel/UCBAttlo5HzQ2e41fwXjdJHA",
+
+  instagram:
+    "https://www.instagram.com/shawtt_gaming/",
+
+  discord:
+    "https://linktr.ee/Shawtt_Gaming",
 
   // YouTube public handle
-  channelHandle: "@CaptainVaani",
+  channelHandle: "@Shawtt",
 
   // =========================
   // BRAND COLORS
   // =========================
 
-  accent: "#ff315f",
-  accentDark: "#d91f48",
+  accent: "#ff2b2b",
+  accentDark: "#c91616",
 
   // =========================
   // HERO
   // =========================
 
-  heroEyebrow: "WELCOME TO VAANI'S ZONE",
+  heroEyebrow: "SHAWTT GAMING",
 
-  heroTitleLine1: "GAME. CHAT.",
-  heroTitleLine2: "REPEAT.",
+  heroTitleLine1: "RANK UP.",
+  heroTitleLine2: "PLAY SHARP.",
 
   heroDescription:
-    "Gaming, chaos, conversations and everything in between. Join Captain Vaani for live games, community moments and streams where fun comes before perfection.",
+    "High-rank Valorant gameplay, practical tips, tutorials and daily live sessions built around helping players improve and enjoy the grind.",
 
   // =========================
   // CONTENT SECTION
   // =========================
 
-  contentEyebrow: "THE ZONE",
+  contentEyebrow: "THE DAILY GRIND",
 
-  contentTitleLine1: "GAME.",
-  contentTitleLine2: "CHAT. REPEAT.",
+  contentTitleLine1: "PLAY.",
+  contentTitleLine2: "IMPROVE. DOMINATE.",
 
   contentDescription:
-    "From competitive Valorant sessions to GTA chaos, Captain Vaani's streams are built around games, conversations and a community that comes along for the ride.",
+    "From high-rank Valorant gameplay to practical guides, customs and live community sessions, Shawtt Gaming is all about getting better while enjoying the game.",
 
   categories: [
     {
       number: "01",
       title: "VALORANT",
-      description: "Ranked grind · Road to 3K · Live sessions",
+      description:
+        "High-rank gameplay · Ranked grind · Competitive sessions",
     },
     {
       number: "02",
-      title: "GTA V",
-      description: "Chaos · Stories · Open-world adventures",
+      title: "GUIDES",
+      description:
+        "Tips & tricks · FPS fixes · Easy-to-follow tutorials",
     },
     {
       number: "03",
       title: "COMMUNITY",
-      description: "Live chats · Reactions · Hanging out",
+      description:
+        "Live streams · Customs · Giveaways · Community games",
     },
   ],
 
@@ -72,21 +80,22 @@ const creator = {
   // ABOUT
   // =========================
 
-  aboutEyebrow: "ABOUT CAPTAIN VAANI",
+  aboutEyebrow: "ABOUT SHAWTT GAMING",
 
-  aboutTitleLine1: "WELCOME TO",
-  aboutTitleLine2: "VAANI'S ZONE.",
+  aboutTitleLine1: "JOIN THE",
+  aboutTitleLine2: "DAILY GRIND.",
 
   aboutParagraphs: [
-    "Gamer by mistake, community person by choice. Captain Vaani streams games she loves, chats with viewers and focuses on fun over perfection.",
-    "Beyond gaming, she has worked with brands, loves doodling, reading comics and watching the Marvel Cinematic Universe.",
+    "I'm Ayushmann Rawat from Ghaziabad, a passionate Valorant player and content creator. Shawtt Gaming is built around high-rank gameplay, useful guides and helping players improve their game.",
+
+    "From ranked sessions and customs to tips, tutorials and community events, the goal is simple: improve, level up and enjoy the grind together.",
   ],
 
   // =========================
   // FOOTER
   // =========================
 
-  footerTagline: "Gaming. Chaos. Community.",
+  footerTagline: "Rank Up. Play Sharp.",
 };
 
 export default creator;
